@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SnapNotes - Upload PDF</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='pdff.css') }}">
+  <style>
+    .flashcard {
+      width: 200px;
+      height: 320px;
+      margin: 15px;
+      display: inline-block;
+      /* Crucial for 3D effect */
+      perspective: 1000px;
+    }
+
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      /* Defines the flip speed */
+      transition: transform 0.8s;
+      /* Crucial for 3D effect */
+      transform-style: preserve-3d;
+    }
+
+    .flashcard.flipped .flashcard-inner {
+      /* Flips the card */
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-front,
+    .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      /* Crucial: Hides the face when it's rotated away from the viewer */
+      backface-visibility: hidden;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 6px;
+      font-size: 18px;
+      padding: 15px;
+      box-shadow: 0px 3px 7px rgba(0, 0, 0, 0.15);
+      /* Removed redundant transition: 0.3s; as inner handles the flip transition */
+    }
+
+    /* 💡 FIX: Only apply hover to the front face when the card is NOT flipped */
+    .flashcard:not(.flipped) .flashcard-front:hover {
+      background: #077bc8;
+    }
+
+    .flashcard-front {
+      background: #3498db;
+      color: white;
+    }
+
+    .flashcard-back {
+      background: #0057c9;
+      color: white;
+      /* Starts the back face rotated away from the viewer */
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <h1 class="logo">📚 SnapNotes</h1>
+    <a href="/profile" class="profile-link">Your Profile</a>
+    <a href="/logout" class="logout">LogOut</a>
+  </nav>
+
+  <!-- Upload Section -->
+  <section class="upload-section">
+    <h2>Upload Your PDF</h2>
+    <p>Drag & drop your study material here or click to upload</p>
+    <form action="/pdfsumm" id="uploadForm" enctype="multipart/form-data" method="post">
+      <div class="upload-box" id="uploadBox">
+        <input type="file" id="fileInput" name="pdf_file" accept=".pdf">
+        <label for="fileInput" class="upload-label">Choose PDF</label><br><br>
+
+        <button type="submit" class="upload-lab">Upload, Extract & Generate Quiz</button>
+      </div>
+    </form>
+    <div id="loader" style="display:none;">
+      <div class="spinner"></div>
+    </div>
+    <script>
+      document.getElementById("uploadForm").addEventListener("submit", function () {
+        document.getElementById("loader").style.display = "flex";
+      });
+    </script>
+  </section>
+
+  <!-- Summary Output Section -->
+  <h2>Summary</h2>
+  <div id="summary-container">
+    <div id="summary">{{summ}}</div>
+  </div>
+
+  <div>
+
+    {% for card in flashcard %}
+
+    <div class="flashcard" onclick="this.classList.toggle('flipped')">
+
+      <div class="flashcard-inner">
+
+        <div class="flashcard-front">{{ card.q }}</div>
+        <div class="flashcard-back">{{ card.a }}</div>
+
+      </div>
+
+    </div>
+
+    {% endfor %}
+  </div>
+
+  {% if quiz %}
+  <section class="quiz-section">
+    <h2>📝 Generated Quiz</h2><br><br>
+    <div class="quiz-box">
+      <form method="post">
+        {% for q in quiz %}
+        <div class="quiz-question">
+          <p><b>Q{{ loop.index }}: {{ q.question }}</b></p>
+          {% set q_index = loop.index %} <!-- save outer loop index -->
+
+          {% for opt in q.options %}
+          <label>
+            <input type="radio" name="q{{ q_index }}" value="{{ opt }}">
+            {{ opt }}
+          </label><br>
+          {% endfor %}
+
+          <p class="correct-answer" style="display:none;">{{ q.answer }}</p>
+          <hr>
+        </div><br><br>
+        {% endfor %}
+        <button type="button" class="butt" onclick="evaluateQuiz()">Submit Quiz</button> <br><br>
+      </form>
+    </div>
+  </section>
+  {% endif %}
+
+  <script>
+    function evaluateQuiz() {
+      let questions = document.querySelectorAll(".quiz-question");
+      let score = 0;
+
+      questions.forEach((q) => {
+        let selected = q.querySelector("input[type=radio]:checked");
+        let correct = q.querySelector(".correct-answer").textContent.trim();
+
+        if (selected) {
+          let chosenLetter = selected.value.trim().charAt(0);
+          if (chosenLetter === correct) {
+            score++;
+          }
+        }
+
+        // show correct answer
+        let answerText = q.querySelector(".correct-answer");
+        answerText.style.display = "block";
+        answerText.innerHTML = "✅ Correct Answer: " + correct;
+      });
+
+      alert("Your Score: " + score + "/" + questions.length);
+    }
+
+
+
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linguasnap - Story Summaries</title>
+    <link rel="stylesheet" href="../static/story.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1 class="logo">📖 Linguasnap</h1>
+        <a href="profile.html" class="profile-link">Your Profile</a>
+    </nav>
+
+    <!-- Upload/Text Section -->
+    <section class="upload-section">
+        <h2>Upload PDF or Enter Text</h2>
+        <p>Get your study material turned into a short story summary</p>
+
+        <!-- File Upload -->
+        <form action="/storyy" enctype="multipart/form-data" method="post">
+            <div class="upload-box" id="uploadBox">
+                <input type="file" id="fileInput" name="pdf_file" accept=".pdf">
+                <label for="fileInput" class="upload-label">Choose PDF</label>
+            </div>
+            <button type="submit" id="generateBtn">Generate Story Summary</button>
+        </form>
+    </section>
+
+    <!-- Summary Output Section -->
+    <section class="summary-section">
+        <h2>Generated Story Summary</h2>
+        <div class="summary-box">
+            <p id="summaryText"> {{ strr }} </p>
+        </div>
+
+        {% if audio_file %}
+        <h4>Listen to your story:</h4>
+        <audio controls>
+            <source src="{{ url_for('static', filename='AIStory.mp3') }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        {% endif %}
+    </section>
+
+
+</body>
+
+</html>

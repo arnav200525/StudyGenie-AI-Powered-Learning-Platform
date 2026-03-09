@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linguasnap - Multi-language Summaries</title>
+    <!-- <link rel="stylesheet" href="lang.css"> -->
+    <link rel="stylesheet" href=" {{ url_for('static', filename='language.css') }} ">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1 class="logo">🌍 Linguasnap</h1>
+        <a href="/profile" class="profile-link">Your Profile</a>
+        <a href="/logout" class="logout">LogOut</a>
+    </nav>
+
+    <!-- Upload/Text Section -->
+    <section class="upload-section">
+        <h2>Upload PDF or Enter Text</h2>
+        <p>Get your study material summarized in the language of your choice</p>
+
+        <!-- File Upload -->
+        <form action="/language" enctype="multipart/form-data" method="post">
+            <div class="upload-box" id="uploadBox">
+                <input type="file" id="fileInput" name="fileInput" accept=".pdf">
+                <label for="fileInput" class="upload-label">Choose PDF</label>
+            </div>
+
+            <!-- Text Input -->
+            <div class="text-box">
+                <textarea id="textInput" name="text_input" placeholder="Or paste your text here..."></textarea>
+            </div>
+
+            <!-- Language Selector -->
+            <div class="language-box">
+                <label for="languageSelect">Choose Language:</label>
+                <select id="languageSelect" name="language">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi</option>
+                    <option value="mr">Marathi</option>
+                </select>
+            </div> <br>
+            <button type="submit" class="upload-lab">Convert</button>
+        </form>
+
+        <!-- Summary Output -->
+        <section class="summary-section">
+            <h2>Generated Translation</h2>
+            <div class="summary-box">
+                <p id="summaryText">{{ summary if summary else "Your translated summary will appear here..." }}</p>
+            </div>
+        </section>
+
+
+        <script>
+            const fileInput = document.getElementById("fileInput");
+            const textInput = document.getElementById("textInput");
+            const languageSelect = document.getElementById("languageSelect");
+            const summaryText = document.getElementById("summaryText");
+
+            // Fake preview (backend integration needed later)
+            fileInput.addEventListener("change", () => {
+                if (fileInput.files.length > 0) {
+                    summaryText.innerText =
+                        "✅ PDF uploaded successfully!\n\n(Your multilingual summary will appear here in " +
+                        languageSelect.options[languageSelect.selectedIndex].text + ")";
+                }
+            });
+
+            textInput.addEventListener("input", () => {
+                if (textInput.value.trim().length > 0) {    
+                    summaryText.innerText =
+                        "📝 Text received!\n\n(Your multilingual summary will appear here in " +
+                        languageSelect.options[languageSelect.selectedIndex].text + ")";
+                }
+            });
+
+            languageSelect.addEventListener("change", () => {
+                summaryText.innerText =
+                    "🌍 Language switched to " +
+                    languageSelect.options[languageSelect.selectedIndex].text +
+                    ". Upload text/PDF to see summary.";
+            });
+        </script>
+</body>
+
+</html>

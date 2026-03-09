@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile</title>
+  <!-- <link rel="stylesheet" href="lang.css"> -->
+   <link rel="stylesheet" href=" {{ url_for('static', filename='profile.css') }} ">
+</head>
+<body>
+  <div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="profile-pic">
+       
+      </div>
+      <div class="profile-info">
+        <h2>{{ username }}</h2>
+        
+      </div>
+    </div>
+
+    <!-- Profile Details -->
+    <div class="profile-details">
+      <h3>User Details</h3>
+      <ul>
+        <li><strong>Email:</strong> {{ email }}</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

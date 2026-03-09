@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyGenie - Learn Better, Faster, Smarter</title>
+  <!-- <link rel="stylesheet" href="../static/welcome.css"> -->
+  <link rel="stylesheet" href=" {{ url_for('static', filename='welcome.css') }} ">
+</head>
+
+<body>
+  <nav class="nav">
+      <a href="/logout" class="logout">LogOut</a>
+  </nav>
+  <div class="page-container"></div>
+  <div class="container">
+    <!-- App Name -->
+    <h1 class="logo">Welcome {{ uname }},</h1>    
+
+    <!-- Description -->
+    <p class="description">
+      
+      Your personalized AI-powered learning assistant.
+    </p>
+
+    <!-- Button -->
+    <a href="/feature" class="cta">Explore</a>
+    <div class="left-image">
+        <img src="{{ url_for('static', filename='welcom.jpg') }}" alt="Flashcard Image">
+    </div>
+    </div>
+  </div>
+</body>
+</html>

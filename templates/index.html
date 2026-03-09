@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StudyGenie – About Us</title>
+  <link rel="stylesheet" href="../static/index.css" />
+  <!-- <link rel="stylesheet" href=" {{ url_for('static', filename = 'index.css') }} "> -->
+  <meta name="description"
+    content="StudyGenie turns books, PDFs, and notes into personalized study guides, flashcards, quizzes, and dashboards with multilingual support." />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#">
+        <span class="logo">🧠</span>
+        <span class="brand-text">StudyGenie</span>
+      </a>
+      <nav class="nav">
+        <a href="/register">Sign Up</a>
+        <a href="/login">Sign In</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <h1>StudyGenie</h1>
+        <p class="subtitle">
+          Your AI-powered companion that transforms raw learning material into
+          <strong>personalized study guides</strong>, <strong>flashcards</strong>,
+          <strong>quizzes</strong>, and <strong>interactive tutoring</strong>.
+        </p>
+      </div>
+    </section>
+
+    <!-- About -->
+    <div class="grid-2">
+      <div>
+        <h2>Our Mission</h2>
+        <p>
+          We help learners study smarter by converting text and into engaging materials
+        </p>
+        <p>
+          StudyGenie removes language barriers, highlights strengths and weaknesses, and keeps you motivated with a
+          clear, visual progress journey.
+        </p>
+      </div>
+
+
+
+      <div class="card">
+        <h3>At a Glance</h3>
+        <ul class="checklist">
+          <li>Converts PDFs/notes</li>
+          <li>Auto summaries and MCQs in seconds</li>
+          <li>Personalized pathways using performance data</li>
+          <li>Multilingual support (English, Hindi, Marathi)</li>
+          <li>Dashboards with streaks & progress bars </li>
+          <li>Secure by design: privacy-first data handling</li>
+          <li>Works on web; mobile-friendly UI</li>
+        </ul>
+      </div>
+    </div>
+    </section>
+    
+    <!-- CTA -->
+    <section class="section alt">
+      <div class="container cta">
+        <h2>Ready to Learn Smarter?</h2>
+        <p>Upload a chapter, get 15 flashcards + 10 MCQs, take a quiz, and watch your dashboard update instantly.</p>
+        <a class="btn" href="/register">Create account</a>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact" class="site-footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> StudyGenie. All rights reserved.</p>
+      <p>Contact: hello@studygenie.app</p>
+    </div>
+  </footer>
+
+  <script>
+    // Simple year injection
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+
+</html>

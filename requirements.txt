@@ -1,0 +1,5 @@
+flask
+google.generativeai
+deep_translator
+gtts
+pdfplumber
