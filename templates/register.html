@@ -1,20 +1,605 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
-   <!-- <link rel="stylesheet" href="../static/register.css"> -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StudyGenie – Register</title>
+  <!-- <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}"> -->
+  <!-- <link rel="stylesheet" href="../static/register.css"> -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* ───────────────────────────────────────────
+       DESIGN TOKENS
+    ─────────────────────────────────────────── */
+    :root {
+      --bg:             #f8f9fc;
+      --bg-white:       #ffffff;
+      --bg-elevated:    #f1f4fb;
+      --border:         #e4e8f0;
+      --border-strong:  #d0d7e6;
+      --border-focus:   #3b6ef0;
+
+      --primary:        #3b6ef0;
+      --primary-light:  #eef2fd;
+      --primary-hover:  #2d5ce8;
+      --accent:         #7c5cfc;
+
+      --green:          #10b981;
+      --green-light:    #ecfdf5;
+      --red:            #ef4444;
+      --red-light:      #fef2f2;
+
+      --text-1:         #111827;
+      --text-2:         #4b5768;
+      --text-3:         #9aa5b4;
+
+      --radius-sm:      8px;
+      --radius-md:      12px;
+      --radius-lg:      16px;
+      --radius-xl:      24px;
+
+      --shadow-sm:      0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:      0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-card:    0 8px 40px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      --shadow-primary: 0 8px 32px rgba(59,110,240,0.22);
+
+      --font-display:   'Sora', sans-serif;
+      --font-body:      'DM Sans', sans-serif;
+      --transition:     0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ───────────────────────────────────────────
+       RESET
+    ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-1);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Dot-grid texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,110,240,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,110,240,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Ambient glow */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 640px; height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(124,92,252,0.07) 0%, transparent 65%);
+      top: -100px; right: -100px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ───────────────────────────────────────────
+       HEADER
+    ─────────────────────────────────────────── */
+    .site-header {
+      position: relative;
+      z-index: 10;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(18px) saturate(1.6);
+      -webkit-backdrop-filter: blur(18px) saturate(1.6);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-1);
+      transition: opacity var(--transition);
+    }
+    .brand:hover { opacity: 0.75; }
+
+    .logo-wrap {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #3b6ef0 0%, #7c5cfc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      box-shadow: 0 4px 12px rgba(59,110,240,0.28);
+    }
+
+    .header-link {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-2);
+      transition: color var(--transition);
+    }
+    .header-link:hover { color: var(--primary); }
+
+    /* ───────────────────────────────────────────
+       PAGE LAYOUT
+    ─────────────────────────────────────────── */
+    .page-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ───────────────────────────────────────────
+       REGISTER CARD
+    ─────────────────────────────────────────── */
+    .register-box {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 48px 44px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    /* Gradient top bar */
+    .register-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #3b6ef0, #7c5cfc, #ec4899);
+    }
+
+    /* Card header */
+    .card-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .card-icon {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #3b6ef0 0%, #7c5cfc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(59,110,240,0.25);
+    }
+
+    .card-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text-1);
+      letter-spacing: -0.025em;
+      margin-bottom: 6px;
+    }
+
+    .card-header p {
+      font-size: 0.9rem;
+      color: var(--text-3);
+    }
+
+    /* ───────────────────────────────────────────
+       PERKS STRIP
+    ─────────────────────────────────────────── */
+    .perks {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+      padding: 14px 16px;
+      background: var(--primary-light);
+      border: 1px solid rgba(59,110,240,0.12);
+      border-radius: var(--radius-md);
+    }
+
+    .perk {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .perk i { font-size: 0.72rem; }
+
+    /* ───────────────────────────────────────────
+       FORM
+    ─────────────────────────────────────────── */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Two-column row for name + username */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-group label {
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--text-2);
+      letter-spacing: 0.01em;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap .field-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--text-3);
+      font-size: 0.88rem;
+      pointer-events: none;
+      transition: color var(--transition);
+    }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--text-1);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: all var(--transition);
+    }
+
+    .input-wrap input::placeholder { color: var(--text-3); }
+
+    .input-wrap input:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-white);
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--border-focus);
+      background: var(--bg-white);
+      box-shadow: 0 0 0 3px rgba(59,110,240,0.1);
+    }
+
+    .input-wrap:focus-within .field-icon { color: var(--primary); }
+
+    /* Password toggle */
+    .toggle-pw {
+      position: absolute;
+      right: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-3);
+      font-size: 0.88rem;
+      padding: 0;
+      transition: color var(--transition);
+    }
+    .toggle-pw:hover { color: var(--primary); }
+
+    /* Password strength bar */
+    .strength-bar-wrap {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .strength-seg {
+      flex: 1;
+      height: 3px;
+      border-radius: 3px;
+      background: var(--border);
+      transition: background 0.3s ease;
+    }
+    .strength-label {
+      font-size: 0.75rem;
+      color: var(--text-3);
+      margin-top: 4px;
+      min-height: 16px;
+      transition: color 0.3s ease;
+    }
+
+    /* Submit */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.97rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 100px;
+      cursor: pointer;
+      box-shadow: var(--shadow-primary);
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn-submit:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 10px 36px rgba(59,110,240,0.32);
+      transform: translateY(-2px);
+    }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* Terms note */
+    .terms-note {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-3);
+      line-height: 1.5;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider span {
+      font-size: 0.78rem;
+      color: var(--text-3);
+      font-weight: 500;
+    }
+
+    /* Login link */
+    .login-row {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-2);
+    }
+    .login-row a {
+      color: var(--primary);
+      font-weight: 600;
+      transition: opacity var(--transition);
+    }
+    .login-row a:hover { opacity: 0.75; }
+
+    /* ───────────────────────────────────────────
+       FOOTER
+    ─────────────────────────────────────────── */
+    .site-footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      background: var(--bg-white);
+      padding: 24px;
+      text-align: center;
+    }
+    .site-footer p { font-size: 0.8rem; color: var(--text-3); }
+    .site-footer a { color: var(--primary); transition: opacity var(--transition); }
+    .site-footer a:hover { opacity: 0.75; }
+
+    /* ───────────────────────────────────────────
+       ANIMATIONS
+    ─────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ───────────────────────────────────────────
+       RESPONSIVE
+    ─────────────────────────────────────────── */
+    @media (max-width: 520px) {
+      .register-box { padding: 36px 22px; border-radius: var(--radius-lg); }
+      .page-body { padding: 32px 16px; align-items: flex-start; padding-top: 36px; }
+      .field-row { grid-template-columns: 1fr; }
+      .perks { gap: 12px; }
+    }
+  </style>
 </head>
 
 <body>
-  <div class="register-box">
-    <h2>Register</h2>
-    <form action="/register" method="POST">
-      <input type="text" name="name" placeholder="Name" required />
-      <input type="email" name="email" placeholder="Email" required />
-      <input type="text" name="username" placeholder="Username" required />
-      <input type="password" name="password" placeholder="Password" required />
-      <button type="submit">Register</button>
-      <p>Already member? <a href="/login">Login</a></p>
-    </form>
+
+  <!-- ── HEADER ── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/">
+        <div class="logo-wrap">🧠</div>
+        <span>StudyGenie</span>
+      </a>
+      <a class="header-link" href="/login">
+        Already have an account? <strong style="color:var(--primary);">Sign in</strong>
+      </a>
+    </div>
+  </header>
+
+  <!-- ── MAIN ── -->
+  <div class="page-body">
+    <div class="register-box">
+
+      <!-- Card icon + title -->
+      <div class="card-header">
+        <div class="card-icon">🧠</div>
+        <h2>Create your account</h2>
+        <p>Start your smarter study journey today</p>
+      </div>
+
+      <!-- Perks strip -->
+      <div class="perks">
+        <span class="perk"><i class="fa-solid fa-bolt"></i> Free to start</span>
+        <span class="perk"><i class="fa-solid fa-layer-group"></i> Instant flashcards</span>
+        <span class="perk"><i class="fa-solid fa-shield-halved"></i> Privacy-first</span>
+      </div>
+
+      <!-- Register form — action/method/names unchanged -->
+      <form action="/register" method="POST">
+
+        <!-- Name + Username side by side -->
+        <div class="field-row">
+          <div class="field-group">
+            <label for="name">Full Name</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-user field-icon"></i>
+              <input type="text" id="name" name="name" placeholder="Your name" required />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="username">Username</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-at field-icon"></i>
+              <input type="text" id="username" name="username" placeholder="Choose one" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="field-group">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <i class="fa-solid fa-envelope field-icon"></i>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="field-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <i class="fa-solid fa-lock field-icon"></i>
+            <input type="password" id="password" name="password" placeholder="Create a strong password" required oninput="checkStrength(this.value)" />
+        
+          </div>
+          <!-- Strength indicator -->
+          <div class="strength-bar-wrap">
+            <div class="strength-seg" id="seg1"></div>
+            <div class="strength-seg" id="seg2"></div>
+            <div class="strength-seg" id="seg3"></div>
+            <div class="strength-seg" id="seg4"></div>
+          </div>
+          <div class="strength-label" id="strength-label"></div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          Create account <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <p class="terms-note">
+          By signing up, you agree to our Terms of Service and Privacy Policy.
+        </p>
+
+        <div class="divider"><span>or</span></div>
+
+        <p class="login-row">
+          Already a member? <a href="/login">Sign in</a>
+        </p>
+
+      </form>
+    </div>
   </div>
+
+  <!-- ── FOOTER ── -->
+  <footer class="site-footer">
+    <p>© <span id="year"></span> StudyGenie. All rights reserved. &nbsp;·&nbsp;
+      <a href="mailto:hello@studygenie.app">hello@studygenie.app</a>
+    </p>
+  </footer>
+
+  <script>
+    // Year injection
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Password visibility toggle
+    function togglePassword() {
+      const input = document.getElementById('password');
+      const icon  = document.getElementById('eye-icon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    }
+
+    // Password strength meter
+    function checkStrength(val) {
+      const segs   = [1,2,3,4].map(i => document.getElementById('seg' + i));
+      const label  = document.getElementById('strength-label');
+      const colors = { 1: '#ef4444', 2: '#f97316', 3: '#eab308', 4: '#10b981' };
+      const labels = { 1: 'Weak', 2: 'Fair', 3: 'Good', 4: 'Strong' };
+
+      let score = 0;
+      if (val.length >= 8)              score++;
+      if (/[A-Z]/.test(val))            score++;
+      if (/[0-9]/.test(val))            score++;
+      if (/[^A-Za-z0-9]/.test(val))     score++;
+
+      segs.forEach((seg, i) => {
+        seg.style.background = i < score ? colors[score] : 'var(--border)';
+      });
+
+      label.textContent     = val.length ? labels[score] || '' : '';
+      label.style.color     = val.length ? colors[score] : 'var(--text-3)';
+    }
+  </script>
+
 </body>
+
 </html>

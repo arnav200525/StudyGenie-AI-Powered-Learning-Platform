@@ -10,7 +10,7 @@ from routes.story import story
 from routes.profile import profile
 
 app = Flask(__name__)
-app.secret_key = "genspark"
+app.secret_key = "Academic_Project"
 
 database()
 

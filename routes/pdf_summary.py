@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session
+import sqlite3 as sq
 from essentials import extractpdf, model
 import json
 import re
@@ -48,5 +49,18 @@ Text: {summary}
 
             except:
                 quiz=[]
+
+            if summary and "user_id" in session:
+
+                conn = sq.connect("users.db")
+                cur = conn.cursor()
+
+                cur.execute(
+                    "UPDATE feature_usage SET pdf_cnt = pdf_cnt + 1 WHERE user_id=?",
+                    (session["user_id"],)
+                )
+
+                conn.commit()
+                conn.close()
 
     return render_template("pdfsummarise.html",summ=summary,quiz=quiz)

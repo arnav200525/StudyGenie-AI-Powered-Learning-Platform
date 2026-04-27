@@ -2,50 +2,924 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI FlashCard Generator</title>
-    <link rel="stylesheet" href=" {{ url_for('static', filename ='flashcard.css') }} ">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI FlashCard Generator</title>
+  <!-- <link rel="stylesheet" href=" {{ url_for('static', filename ='flashcard.css') }} "> -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* ───────────────────────────────────────────
+       DESIGN TOKENS
+    ─────────────────────────────────────────── */
+    :root {
+      --bg:             #f8f9fc;
+      --bg-white:       #ffffff;
+      --bg-elevated:    #f1f4fb;
+      --border:         #e4e8f0;
+      --border-strong:  #d0d7e6;
+
+      --primary:        #3b6ef0;
+      --primary-light:  #eef2fd;
+      --primary-hover:  #2d5ce8;
+      --accent:         #7c5cfc;
+      --accent-light:   #f3f0ff;
+      --green:          #10b981;
+      --green-light:    #ecfdf5;
+      --amber:          #f59e0b;
+      --amber-light:    #fffbeb;
+      --pink:           #ec4899;
+      --pink-light:     #fdf2f8;
+      --red:            #ef4444;
+      --red-light:      #fef2f2;
+
+      --text-1:         #111827;
+      --text-2:         #4b5768;
+      --text-3:         #9aa5b4;
+
+      --radius-sm:      8px;
+      --radius-md:      12px;
+      --radius-lg:      16px;
+      --radius-xl:      24px;
+
+      --shadow-sm:      0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:      0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-lg:      0 12px 40px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05);
+      --shadow-primary: 0 8px 32px rgba(59,110,240,0.22);
+      --shadow-accent:  0 8px 28px rgba(124,92,252,0.22);
+
+      --font-display:   'Sora', sans-serif;
+      --font-body:      'DM Sans', sans-serif;
+      --transition:     0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-1);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,110,240,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,110,240,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Soft ambient purple glow */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 560px; height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(124,92,252,0.07) 0%, transparent 65%);
+      top: -80px; right: -80px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ───────────────────────────────────────────
+       NAVBAR
+    ─────────────────────────────────────────── */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(18px) saturate(1.6);
+      -webkit-backdrop-filter: blur(18px) saturate(1.6);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .navbar-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      height: 64px;
+      gap: 12px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-1);
+      margin-right: auto;
+      transition: opacity var(--transition);
+    }
+    .nav-brand:hover { opacity: 0.75; }
+
+    .logo-wrap {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #3b6ef0 0%, #7c5cfc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(59,110,240,0.28);
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.865rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-white);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition);
+      color: var(--text-2);
+    }
+    .nav-btn:hover { color: var(--primary); border-color: rgba(59,110,240,0.3); }
+    .nav-btn.danger:hover { color: var(--red); border-color: rgba(239,68,68,0.25); background: var(--red-light); }
+
+    /* ───────────────────────────────────────────
+       MAIN
+    ─────────────────────────────────────────── */
+    .container {
+      flex: 1;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 56px 28px 80px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+    }
+
+    /* ───────────────────────────────────────────
+       PAGE HEADER
+    ─────────────────────────────────────────── */
+    .page-header {
+      text-align: center;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .page-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--accent-light);
+      border: 1px solid rgba(124,92,252,0.18);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 5px 13px;
+      border-radius: 100px;
+      margin-bottom: 16px;
+    }
+
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.9rem, 3.5vw, 2.7rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-1);
+      margin-bottom: 10px;
+    }
+
+    .page-header h1 .gradient-text {
+      background: linear-gradient(135deg, #7c5cfc 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-header p {
+      font-size: 1rem;
+      color: var(--text-2);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ───────────────────────────────────────────
+       UPLOAD CARD
+    ─────────────────────────────────────────── */
+    .upload-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 44px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s 0.08s ease both;
+      max-width: 680px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .upload-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #7c5cfc, #ec4899, #3b6ef0);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field-group label {
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--text-2);
+      letter-spacing: 0.01em;
+    }
+
+    /* File input wrapper */
+    .file-input-wrap {
+      position: relative;
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 20px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg);
+      transition: all var(--transition);
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .file-input-wrap:hover {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+    .file-input-wrap.has-file {
+      border-color: rgba(16,185,129,0.4);
+      background: var(--green-light);
+      border-style: solid;
+    }
+
+    .file-input-wrap input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+
+    .file-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-light);
+      border: 1px solid rgba(124,92,252,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: var(--accent);
+      flex-shrink: 0;
+      transition: all var(--transition);
+    }
+    .file-input-wrap.has-file .file-icon {
+      background: var(--green-light);
+      border-color: rgba(16,185,129,0.25);
+      color: var(--green);
+    }
+
+    .file-text { display: flex; flex-direction: column; gap: 2px; }
+    .file-text strong {
+      font-size: 0.87rem;
+      font-weight: 600;
+      color: var(--text-1);
+    }
+    .file-text span {
+      font-size: 0.78rem;
+      color: var(--text-3);
+    }
+
+    /* Number input */
+    .number-input-wrap {
+      position: relative;
+    }
+
+    .number-input-wrap i {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      font-size: 0.88rem;
+      pointer-events: none;
+      transition: color var(--transition);
+    }
+
+    .number-input-wrap input[type="number"] {
+      width: 100%;
+      padding: 13px 14px 13px 40px;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--text-1);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: all var(--transition);
+      -moz-appearance: textfield;
+    }
+    .number-input-wrap input[type="number"]::-webkit-inner-spin-button,
+    .number-input-wrap input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .number-input-wrap input[type="number"]::placeholder { color: var(--text-3); }
+    .number-input-wrap input[type="number"]:hover { border-color: var(--border-strong); background: var(--bg-white); }
+    .number-input-wrap input[type="number"]:focus {
+      border-color: var(--accent);
+      background: var(--bg-white);
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.1);
+    }
+    .number-input-wrap:focus-within i { color: var(--accent); }
+
+    /* Submit */
+    .btn-generate {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #7c5cfc 0%, #5b3ef0 100%);
+      color: #fff;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.97rem;
+      border: none;
+      border-radius: 100px;
+      cursor: pointer;
+      box-shadow: var(--shadow-accent);
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+    }
+    .btn-generate:hover {
+      box-shadow: 0 12px 36px rgba(124,92,252,0.38);
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+    }
+    .btn-generate:active { transform: translateY(0); }
+
+    /* ───────────────────────────────────────────
+       LOADER OVERLAY
+    ─────────────────────────────────────────── */
+    #loader {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(248,249,252,0.88);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loader-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 40px 52px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .spinner {
+      width: 44px; height: 44px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      margin: 0 auto 18px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loader-card h4 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-1);
+      margin-bottom: 6px;
+    }
+    .loader-card p { font-size: 0.85rem; color: var(--text-3); }
+
+    /* ───────────────────────────────────────────
+       FLASHCARD RESULTS
+    ─────────────────────────────────────────── */
+    .results-section {
+      animation: fadeUp 0.5s 0.15s ease both;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .results-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .results-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-light);
+      border: 1px solid rgba(124,92,252,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: var(--accent);
+    }
+
+    .results-title-row h2 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-1);
+      letter-spacing: -0.02em;
+    }
+
+    .card-count-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-light);
+      border: 1px solid rgba(124,92,252,0.15);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+
+    .hint-text {
+      font-size: 0.83rem;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── THE FLASHCARD GRID ── */
+    .flashcards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    /* 3D flip container */
+    .flashcard {
+      height: 200px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: var(--radius-lg);
+    }
+
+    .flashcard.flipped .flashcard-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-front,
+    .flashcard-back {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    /* Front face */
+    .flashcard-front {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .flashcard:hover .flashcard-front {
+      border-color: rgba(124,92,252,0.25);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-face-label {
+      position: absolute;
+      top: 12px; left: 16px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.45;
+    }
+
+    .flip-hint {
+      position: absolute;
+      bottom: 11px; right: 14px;
+      font-size: 0.7rem;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .flashcard:hover .flip-hint { opacity: 1; }
+
+    .flashcard-front .card-face-label { color: var(--accent); }
+    .flashcard-front .question-text {
+      font-family: var(--font-display);
+      font-size: 0.97rem;
+      font-weight: 700;
+      color: var(--text-1);
+      line-height: 1.45;
+    }
+
+    /* Back face */
+    .flashcard-back {
+      background: linear-gradient(135deg, #7c5cfc 0%, #5b3ef0 100%);
+      border: 1px solid transparent;
+      box-shadow: var(--shadow-accent);
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-back .card-face-label { color: rgba(255,255,255,0.6); }
+
+    .flashcard-back .answer-text {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.5;
+    }
+
+    .flashcard-back .flip-hint { color: rgba(255,255,255,0.5); opacity: 0; }
+    .flashcard.flipped .flashcard-back .flip-hint { opacity: 1; }
+
+    /* Card number badge */
+    .card-number {
+      position: absolute;
+      top: 12px; right: 14px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-3);
+      font-family: var(--font-display);
+    }
+    .flashcard-back .card-number { color: rgba(255,255,255,0.45); }
+
+    /* Progress dots */
+    .progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+
+    .prog-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border-strong);
+      transition: all var(--transition);
+      cursor: pointer;
+    }
+    .prog-dot.seen { background: var(--accent); transform: scale(1.2); }
+
+    /* ───────────────────────────────────────────
+       EMPTY STATE
+    ─────────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 56px 24px;
+      background: var(--bg-white);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-xl);
+    }
+
+    .empty-icon {
+      width: 64px; height: 64px;
+      border-radius: var(--radius-lg);
+      background: var(--accent-light);
+      border: 1px solid rgba(124,92,252,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin: 0 auto 18px;
+    }
+
+    .empty-state h3 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-1);
+      margin-bottom: 8px;
+    }
+    .empty-state p { font-size: 0.9rem; color: var(--text-3); }
+
+    /* ───────────────────────────────────────────
+       FOOTER
+    ─────────────────────────────────────────── */
+    .site-footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      background: var(--bg-white);
+      padding: 24px 28px;
+    }
+
+    .footer-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-2);
+    }
+
+    .footer-right p { font-size: 0.8rem; color: var(--text-3); }
+    .footer-right a { color: var(--primary); transition: opacity var(--transition); }
+    .footer-right a:hover { opacity: 0.75; }
+
+    /* ───────────────────────────────────────────
+       ANIMATIONS
+    ─────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ───────────────────────────────────────────
+       RESPONSIVE
+    ─────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .container { padding: 36px 18px 60px; }
+      .upload-card { padding: 28px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .flashcards-grid { grid-template-columns: 1fr; }
+      .flashcard { height: 180px; }
+    }
+  </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>AI FlashCard Generator</h1><br>
-        <!-- <form action="url_for('flashcard.flashcards')" method="post" enctype="multipart/form-data" id="form"> -->
-        <form action="/flashcards" method="post" enctype="multipart/form-data" id="form">
-            <input type="file" name="pdffile" id="pdf_file" accept=".pdf"><br>
-            <input type="number" name="n_cards" placeholder="How many FlashCards you want ? (Default = 10)"><br><br>
-            <button type="submit">Generate FlashCards</button><br><br>
-        </form>
 
-        <div id="loader" style="display:none;">
-            <div class="spinner"></div>
+  <!-- ── NAVBAR ── -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a class="nav-brand" href="#">
+        <div class="logo-wrap">🧠</div>
+        <span>StudyGenie</span>
+      </a>
+      <a href="/profile" class="nav-btn">
+        <i class="fa-solid fa-circle-user"></i> Profile
+      </a>
+      <a href="/logout" class="nav-btn danger">
+        <i class="fa-solid fa-right-from-bracket"></i> Log Out
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <div class="container">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-badge">
+        <i class="fa-solid fa-layer-group"></i> Spaced Recall
+      </div>
+      <h1>AI <span class="gradient-text">FlashCard</span> Generator</h1>
+      <p>Upload your PDF, set how many cards you want, and let AI do the rest. Click any card to reveal the answer.</p>
+    </div>
+
+    <!-- Upload form card -->
+    <div class="upload-card">
+      <form action="/flashcards" method="post" enctype="multipart/form-data" id="form">
+
+        <div class="form-row">
+
+          <!-- PDF file -->
+          <div class="field-group">
+            <label>Upload PDF</label>
+            <div class="file-input-wrap" id="fileWrap">
+              <input type="file" name="pdffile" id="pdf_file" accept=".pdf">
+              <div class="file-icon"><i class="fa-solid fa-file-pdf"></i></div>
+              <div class="file-text">
+                <strong id="fileLabel">Choose a PDF</strong>
+                <span>or drag &amp; drop here</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card count -->
+          <div class="field-group">
+            <label>Number of Cards</label>
+            <div class="number-input-wrap">
+              <i class="fa-solid fa-hashtag"></i>
+              <input type="number" name="n_cards" placeholder="Default: 12" min="1" max="50" />
+            </div>
+          </div>
+
         </div>
-        <script>
-            document.getElementById("form").addEventListener("submit", function () {
-                document.getElementById("loader").style.display = "flex";
-            });
-        </script>
 
-        <div>
+        <button type="submit" class="btn-generate">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Generate FlashCards
+        </button>
 
-            {% for card in flashcard %}
+      </form>
+    </div>
 
-            <div class="flashcard" onclick="this.classList.toggle('flipped')">
+    <!-- Flashcard results -->
+    <div class="results-section">
 
-                <div class="flashcard-inner">
+      <!-- Results header — only show when cards exist -->
+      {% if flashcard %}
+      <div class="results-header">
+        <div class="results-title-row">
+          <div class="results-icon"><i class="fa-solid fa-layer-group"></i></div>
+          <h2>Your FlashCards</h2>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <span class="hint-text">
+            <i class="fa-regular fa-hand-pointer"></i> Click a card to flip
+          </span>
+        </div>
+      </div>
+      {% endif %}
 
-                    <div class="flashcard-front">{{ card.q }}</div>
-                    <div class="flashcard-back">{{ card.a }}</div>
+      <!-- Cards grid -->
+      <div class="flashcards-grid" id="cardsGrid">
+        {% for card in flashcard %}
+        <div class="flashcard" onclick="flipCard(this, {{ loop.index0 }})">
+          <div class="flashcard-inner">
 
-                </div>
-
+            <!-- Front: Question -->
+            <div class="flashcard-front">
+              <span class="card-face-label">Question</span>
+              <span class="card-number">#{{ loop.index }}</span>
+              <p class="question-text">{{ card.q }}</p>
+              <span class="flip-hint"><i class="fa-solid fa-rotate"></i> Flip</span>
             </div>
 
-            {% endfor %}
+            <!-- Back: Answer -->
+            <div class="flashcard-back">
+              <span class="card-face-label">Answer</span>
+              <span class="card-number">#{{ loop.index }}</span>
+              <p class="answer-text">{{ card.a }}</p>
+              <span class="flip-hint"><i class="fa-solid fa-rotate"></i> Flip back</span>
+            </div>
+
+          </div>
         </div>
+        {% endfor %}
+      </div>
+
+      <!-- Empty state (when no cards yet) -->
+      {% if not flashcard %}
+      <div class="empty-state">
+        <div class="empty-icon">♦️</div>
+        <h3>No flashcards yet</h3>
+        <p>Upload a PDF above and click "Generate FlashCards" to get started.</p>
+      </div>
+      {% endif %}
+
+      <!-- Progress dots -->
+      {% if flashcard %}
+      <div class="progress-row" id="progressDots">
+        {% for card in flashcard %}
+        <div class="prog-dot" id="dot{{ loop.index0 }}"></div>
+        {% endfor %}
+      </div>
+      {% endif %}
 
     </div>
+
+  </div>
+
+  <!-- ── LOADER OVERLAY ── -->
+  <div id="loader" style="display:none;">
+    <div class="loader-card">
+      <div class="spinner"></div>
+   
+    </div>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo-wrap" style="width:26px;height:26px;font-size:13px;">🧠</div>
+        StudyGenie
+      </div>
+      <div class="footer-right">
+        <p>© <span id="year"></span> StudyGenie · <a href="mailto:hello@studygenie.app">hello@studygenie.app</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Show loader on submit
+    document.getElementById("form").addEventListener("submit", function () {
+      document.getElementById("loader").style.display = "flex";
+    });
+
+    // File name display
+    document.getElementById("pdf_file").addEventListener("change", function () {
+      const wrap  = document.getElementById("fileWrap");
+      const label = document.getElementById("fileLabel");
+      if (this.files && this.files[0]) {
+        label.textContent = this.files[0].name;
+        wrap.classList.add("has-file");
+        wrap.querySelector(".file-icon i").className = "fa-solid fa-circle-check";
+      } else {
+        label.textContent = "Choose a PDF";
+        wrap.classList.remove("has-file");
+        wrap.querySelector(".file-icon i").className = "fa-solid fa-file-pdf";
+      }
+    });
+
+    // Flip tracker for progress dots
+    const seen = new Set();
+
+    function flipCard(el, idx) {
+      el.classList.toggle("flipped");
+      seen.add(idx);
+      const dot = document.getElementById("dot" + idx);
+      if (dot) dot.classList.add("seen");
+    }
+  </script>
+
 </body>
 
 </html>

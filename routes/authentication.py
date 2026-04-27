@@ -19,7 +19,13 @@ def register():
             "INSERT INTO users (name,email,username,password) VALUES (?,?,?,?)",
             (name,email,username,password)
         )
+        user_id = cur.lastrowid
 
+        cur.execute(
+            "INSERT INTO feature_usage(user_id) VALUES (?)",
+            (user_id,)
+        )
+        
         conn.commit()
         conn.close()
 
@@ -48,11 +54,6 @@ def login():
 
         user=cur.fetchone()
 
-        cur.execute(
-            "SELECT name FROM users WHERE username=?",
-            (username,)
-        )
-
         actual_name=cur.fetchone()
 
         conn.close()
@@ -61,6 +62,8 @@ def login():
             session["name"]=actual_name[0]
 
         if user:
+            session["user_id"] = user[0]
+            session["name"] = user[1]
             return redirect("/welcome")
         else:
             msg="Wrong Password!!"

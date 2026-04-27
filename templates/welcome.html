@@ -1,34 +1,682 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StudyGenie - Learn Better, Faster, Smarter</title>
   <!-- <link rel="stylesheet" href="../static/welcome.css"> -->
-  <link rel="stylesheet" href=" {{ url_for('static', filename='welcome.css') }} ">
+  <!-- <link rel="stylesheet" href=" {{ url_for('static', filename='welcome.css') }} "> -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* ───────────────────────────────────────────
+       DESIGN TOKENS
+    ─────────────────────────────────────────── */
+    :root {
+      --bg:             #f8f9fc;
+      --bg-white:       #ffffff;
+      --bg-elevated:    #f1f4fb;
+      --border:         #e4e8f0;
+      --border-strong:  #d0d7e6;
+
+      --primary:        #3b6ef0;
+      --primary-light:  #eef2fd;
+      --primary-hover:  #2d5ce8;
+      --accent:         #7c5cfc;
+      --accent-light:   #f3f0ff;
+      --green:          #10b981;
+      --green-light:    #ecfdf5;
+      --amber:          #f59e0b;
+      --amber-light:    #fffbeb;
+      --pink:           #ec4899;
+      --pink-light:     #fdf2f8;
+
+      --text-1:         #111827;
+      --text-2:         #4b5768;
+      --text-3:         #9aa5b4;
+
+      --radius-sm:      8px;
+      --radius-md:      12px;
+      --radius-lg:      16px;
+      --radius-xl:      24px;
+
+      --shadow-sm:      0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:      0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-lg:      0 12px 40px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05);
+      --shadow-primary: 0 8px 32px rgba(59,110,240,0.22);
+
+      --font-display:   'Sora', sans-serif;
+      --font-body:      'DM Sans', sans-serif;
+      --transition:     0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ───────────────────────────────────────────
+       RESET
+    ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-1);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Dot-grid texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,110,240,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,110,240,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ───────────────────────────────────────────
+       NAV / HEADER
+    ─────────────────────────────────────────── */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(18px) saturate(1.6);
+      -webkit-backdrop-filter: blur(18px) saturate(1.6);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-1);
+      transition: opacity var(--transition);
+    }
+    .nav-brand:hover { opacity: 0.75; }
+
+    .logo-wrap {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #3b6ef0 0%, #7c5cfc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(59,110,240,0.28);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .greeting-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary-light);
+      border: 1px solid rgba(59,110,240,0.15);
+      border-radius: 100px;
+      padding: 6px 14px 6px 8px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .avatar {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b6ef0, #7c5cfc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.855rem;
+      font-weight: 600;
+      color: var(--text-2);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-white);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition);
+    }
+    .logout:hover {
+      color: #ef4444;
+      border-color: rgba(239,68,68,0.25);
+      background: #fef2f2;
+      box-shadow: none;
+    }
+    .logout i { font-size: 0.8rem; }
+
+    /* ───────────────────────────────────────────
+       MAIN
+    ─────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 56px 28px 72px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ───────────────────────────────────────────
+       HERO ROW
+    ─────────────────────────────────────────── */
+    .hero-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: center;
+      margin-bottom: 56px;
+    }
+
+    .hero-text { max-width: 580px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--primary-light);
+      border: 1px solid rgba(59,110,240,0.18);
+      color: var(--primary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 5px 13px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .hero-text h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      color: var(--text-1);
+      margin-bottom: 14px;
+      animation: fadeUp 0.5s 0.07s ease both;
+    }
+
+    .hero-text h1 .uname {
+      background: linear-gradient(135deg, #3b6ef0 0%, #7c5cfc 55%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-text .description {
+      font-size: 1.08rem;
+      color: var(--text-2);
+      line-height: 1.75;
+      margin-bottom: 32px;
+      max-width: 460px;
+      animation: fadeUp 0.5s 0.14s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.5s 0.21s ease both;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.97rem;
+      padding: 14px 28px;
+      border-radius: 100px;
+      box-shadow: var(--shadow-primary);
+      transition: all var(--transition);
+    }
+    .cta:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 10px 36px rgba(59,110,240,0.32);
+      transform: translateY(-2px);
+    }
+    .cta i { font-size: 0.85rem; }
+
+    .cta-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-white);
+      color: var(--text-2);
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.97rem;
+      padding: 14px 22px;
+      border-radius: 100px;
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition);
+    }
+    .cta-ghost:hover {
+      color: var(--text-1);
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    /* Hero image */
+    .hero-image-wrap {
+      width: 320px;
+      flex-shrink: 0;
+      animation: fadeUp 0.5s 0.28s ease both;
+    }
+
+    .hero-image-wrap img {
+      width: 100%;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      display: block;
+      object-fit: cover;
+    }
+
+    /* ───────────────────────────────────────────
+       QUICK STATS
+    ─────────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 48px;
+      animation: fadeUp 0.5s 0.32s ease both;
+    }
+
+    .stat-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition);
+    }
+    .stat-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: rgba(59,110,240,0.2);
+      transform: translateY(-2px);
+    }
+
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      flex-shrink: 0;
+    }
+    .icon-blue   { background: var(--primary-light); color: var(--primary); border: 1px solid rgba(59,110,240,0.15); }
+    .icon-purple { background: var(--accent-light);  color: var(--accent);  border: 1px solid rgba(124,92,252,0.15); }
+    .icon-green  { background: var(--green-light);   color: var(--green);   border: 1px solid rgba(16,185,129,0.15); }
+    .icon-amber  { background: var(--amber-light);   color: var(--amber);   border: 1px solid rgba(245,158,11,0.15); }
+    .icon-pink   { background: var(--pink-light);    color: var(--pink);    border: 1px solid rgba(236,72,153,0.15); }
+
+    .stat-info {}
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-1);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-3);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ───────────────────────────────────────────
+       SECTION LABEL
+    ─────────────────────────────────────────── */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 18px;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 18px; height: 2px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    /* ───────────────────────────────────────────
+       FEATURE CARDS
+    ─────────────────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      animation: fadeUp 0.5s 0.38s ease both;
+    }
+
+    .feature-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--transition);
+    }
+
+    .feature-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: rgba(59,110,240,0.2);
+      transform: translateY(-3px);
+    }
+    .feature-card:hover::after { transform: scaleX(1); }
+
+    .feature-icon {
+      width: 46px; height: 46px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .feature-card h3 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-1);
+      letter-spacing: -0.01em;
+    }
+
+    .feature-card p {
+      font-size: 0.87rem;
+      color: var(--text-2);
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    .feature-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-top: 4px;
+      transition: gap var(--transition);
+    }
+    .feature-card:hover .feature-link { gap: 10px; }
+
+    /* ───────────────────────────────────────────
+       FOOTER
+    ─────────────────────────────────────────── */
+    .site-footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      background: var(--bg-white);
+      padding: 24px 28px;
+    }
+
+    .footer-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-2);
+    }
+
+    .footer-right p { font-size: 0.8rem; color: var(--text-3); }
+    .footer-right a { color: var(--primary); transition: opacity var(--transition); }
+    .footer-right a:hover { opacity: 0.75; }
+
+    /* ───────────────────────────────────────────
+       ANIMATIONS
+    ─────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ───────────────────────────────────────────
+       RESPONSIVE
+    ─────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .hero-row { grid-template-columns: 1fr; }
+      .hero-image-wrap { width: 100%; max-width: 420px; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      .main { padding: 36px 20px 56px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr; }
+      .hero-actions { flex-direction: column; }
+      .cta, .cta-ghost { justify-content: center; }
+      .greeting-chip { display: none; }
+    }
+  </style>
 </head>
 
 <body>
+
+  <!-- ── NAV ── -->
   <nav class="nav">
-      <a href="/logout" class="logout">LogOut</a>
+    <div class="nav-inner">
+      <a class="nav-brand" href="#">
+        <div class="logo-wrap">🧠</div>
+        <span>StudyGenie</span>
+      </a>
+      <div class="nav-right">
+        <!-- Greeting chip using Jinja uname -->
+         <a href="/profile">
+        <div class="greeting-chip">
+          <div class="avatar">{{ uname[0] }}</div>
+          {{ uname }}
+        </div></a>
+        <a href="/logout" class="logout">
+          <i class="fa-solid fa-right-from-bracket"></i> Log Out
+        </a>
+      </div>
+    </div>
   </nav>
-  <div class="page-container"></div>
-  <div class="container">
-    <!-- App Name -->
-    <h1 class="logo">Welcome {{ uname }},</h1>    
 
-    <!-- Description -->
-    <p class="description">
-      
-      Your personalized AI-powered learning assistant.
-    </p>
+  <!-- ── MAIN ── -->
+  <main class="main">
 
-    <!-- Button -->
-    <a href="/feature" class="cta">Explore</a>
-    <div class="left-image">
-        <img src="{{ url_for('static', filename='welcom.jpg') }}" alt="Flashcard Image">
+    <!-- Hero row -->
+    <div class="hero-row">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <i class="fa-solid fa-bolt"></i> AI-Powered Learning
+        </div>
+        <h1>Welcome back,<br><span class="uname">{{ uname }}</span> 👋</h1>
+        <p class="description">
+          Your personalized AI-powered learning assistant. Upload notes, generate flashcards, take quizzes — and watch your progress grow.
+        </p>
+        <div class="hero-actions">
+          <a href="/feature" class="cta">
+            Explore features <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
     </div>
+
+    <!-- Quick stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon icon-blue"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">15<span style="color:var(--primary);font-size:1.1rem;">+</span></div>
+          <div class="stat-label">Flashcards / upload</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-purple"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">10</div>
+          <div class="stat-label">MCQs generated</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-green"><i class="fa-solid fa-language"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Languages supported</div>
+        </div>
+      </div>
     </div>
-  </div>
+
+    <!-- Feature cards -->
+    <div class="section-label">What you can do</div>
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon icon-blue"><i class="fa-solid fa-file-arrow-up"></i></div>
+        <h3>Upload & Parse</h3>
+        <p>Drop in any PDF, textbook chapter, or notes — StudyGenie extracts key concepts automatically.</p>
+        <a href="/pdfsumm" class="feature-link">Get started <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-purple"><i class="fa-solid fa-layer-group"></i></div>
+        <h3>Flashcard Generator</h3>
+        <p>Instantly generate spaced-repetition flashcards tailored to your material and learning gaps.</p>
+        <a href="/flashcards" class="feature-link">Make flashcards <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-amber"><i class="fa-solid fa-list-check"></i></div>
+        <h3>Auto-Quiz</h3>
+        <p>Test yourself with 10 MCQs generated from your content. Track your score on the dashboard.</p>
+        <a href="/pdfsumm" class="feature-link">Take a quiz <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-green"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>Progress Dashboard</h3>
+        <p>Visual streaks, heatmaps, and score trends — so you always know where you stand.</p>
+        <a href="/profile" class="feature-link">View dashboard <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-blue" style="background:var(--primary-light);color:var(--primary);"><i class="fa-solid fa-language"></i></div>
+        <h3>Multilingual</h3>
+        <p>Study in English, Hindi, or Marathi — no language barrier between you and knowledge.</p>
+        <a href="/language" class="feature-link">Choose language <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo-wrap" style="width:26px;height:26px;font-size:13px;">🧠</div>
+        StudyGenie
+      </div>
+      <div class="footer-right">
+        <p>© <span id="year"></span> StudyGenie · <a href="mailto:hello@studygenie.app">hello@studygenie.app</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
 </body>
+
 </html>
